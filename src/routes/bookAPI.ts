@@ -1,45 +1,38 @@
-import * as express from "express";
+import bookModel from '../models/bookModel';
 
-const router = express.Router();
+export const getBookList = async (req: any, res: any) => {
+  bookModel.find((err: any, result: any) => {
+    if (err) {
+      res.send("Error!");
+    } else {
+      console.log(JSON.stringify(result))
+      res.send(result);
+    }
+  });
+};
 
-// Load Book model
-const Book = require('../models/bookModel');
+export const createBook = async (req: any, res: any) => {
+  let Book = new bookModel(req.body);
+  Book.save((err: any, result: any) => {
+    if (err) {
+      res.send("Error!");
+    } else {
+      console.log(JSON.stringify(result))
+      res.send(result);
+    }
+  });
+};
 
-
-router.get('/', (req:any, res:any) => {
-  Book.find()
-    .then(books => res.json(books))
-    .catch(() => res.status(404).json({ nobooksfound: 'No Books found' }));
-});
-
-
-router.get('/:id', (req:any, res:any) => {
-  Book.findById(req.params.id)
-    .then(book => res.json(book))
-    .catch(() => res.status(404).json({ nobookfound: 'No Book found' }));
-});
-
-
-router.post('/', (req:any, res:any) => {
-  Book.create(req.body)
-    .then(() => res.json({ msg: 'Book added successfully' }))
-    .catch(() => res.status(400).json({ error: 'Unable to add this book' }));
-});
-
-
-router.put('/:id', (req:any, res:any) => {
-  Book.findByIdAndUpdate(req.params.id, req.body)
+export const updateBook = async (req: any, res: any) => {
+  bookModel.findByIdAndUpdate(req.params.id, req.body)
     .then(() => res.json({ msg: 'Updated successfully' }))
     .catch(() =>
       res.status(400).json({ error: 'Unable to update the Database' })
     );
-});
+};
 
-
-router.delete('/:id', (req:any, res:any) => {
-  Book.findByIdAndRemove(req.params.id, req.body)
+export const deleteBook = async (req: any, res: any) => {
+  bookModel.findByIdAndRemove(req.params.id, req.body)
     .then(() => res.json({ mgs: 'Book entry deleted successfully' }))
     .catch(() => res.status(404).json({ error: 'No such a book' }));
-});
-
-module.exports = router;
+};
