@@ -1,13 +1,17 @@
-import {Schema} from 'mongoose';
-import * as mongoose from 'mongoose';
+import * as mongoose from "mongoose";
+import { Schema } from "mongoose"
+import IBook from "../interfaces/bookInterface";
 
-export const Book = new Schema({
-  book_url: String,
-  title: String,
-  price: Number,
-  author: String,
-  details:String
-});
+const BookSchema: Schema = new Schema(
+  {
+    title:{type: String,required:true},
+    author:{type: String,required:true},
+    price:{type: Number,required:true},
+    details:{type: String,required:true},
+  },
+  {
+    timestamps:true
+  }
+);
 
-const bookModel = mongoose.model("books", Book);
-export default bookModel;
+export default mongoose.model<IBook>('books',BookSchema);
