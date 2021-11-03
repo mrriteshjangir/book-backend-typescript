@@ -28,7 +28,9 @@ app.use(cors());
 app.use(express.json());
 
 /** Routes go here */
-router.use('/api/',bookRoute);
+app.use('/api/', bookRoute);
+
+app.get('/',(req,res)=>res.send('okay'));
 
 const server = app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
