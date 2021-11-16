@@ -1,24 +1,29 @@
 import { NextFunction, Request, Response } from "express";
 import * as mongoose from 'mongoose';
 import Book from '../models/bookModel';
+import { airbrake } from "../AirNote";
 
 const getAllBooks = (req: Request, res: Response, next: NextFunction) => {
-  Book.find()
-    .exec()
-    .then((results: any) => {
-      return res.status(200).json(
-        {
-          books: results,
-          count: results.length
-        }
-      )
-    })
-    .catch((error: any) => {
-      return res.status(500).json({
-        message: error.message,
-        error
-      })
-    })
+  try {
+    Book.find()
+      .then((results: any) => {
+        return res.status(200).json(
+          {
+            books: results,
+            count: results.length
+          }
+        )
+      });
+    } catch (err) {
+    airbrake.notify({
+      error: err,
+      context: { component: 'bootstrap' },
+      environment: { env1: 'value' },
+      params: { param1: 'value' },
+      session: { session1: 'value' },
+    });
+  }
+
 };
 
 const createBook = (req: Request, res: Response, next: NextFunction) => {
@@ -40,12 +45,15 @@ const createBook = (req: Request, res: Response, next: NextFunction) => {
         book: result
       });
     })
-    .catch((error) => {
-      return res.status(500).json({
-        message: error.message,
-        error
+    .catch((err) => {
+      airbrake.notify({
+        error: err,
+        context: { component: 'bootstrap' },
+        environment: { env1: 'value' },
+        params: { param1: 'value' },
+        session: { session1: 'value' },
       });
     });
 };
 
-export { getAllBooks,createBook };
+export { getAllBooks, createBook };

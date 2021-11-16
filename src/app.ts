@@ -8,18 +8,7 @@ const router = express();
 dotenv.config();
 
 const uri: string = process.env.MONGODB_URI as string;
-mongoose.connect(uri, (err: any) => {
-    if (err) {
-        console.log(err.message);
-    } else {
-        console.log(`Connecting to MONGO`);
-    }
-});
-
-if (!process.env.PORT) {
-    console.log(`Error to get ports`);
-    process.exit(1);
-}
+mongoose.connect(uri);
 
 const PORT: number = parseInt(process.env.PORT as string, 10);
 
@@ -30,8 +19,8 @@ app.use(express.json());
 /** Routes go here */
 app.use('/api/', bookRoute);
 
-app.get('/',(req,res)=>res.send('okay'));
+const hostname = '127.0.0.1';
 
-const server = app.listen(PORT, () => {
-    console.log(`Listening on port ${PORT}`);
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}/`);
 });
