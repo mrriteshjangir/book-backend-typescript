@@ -41,6 +41,7 @@ const createBook = (req: Request, res: Response, next: NextFunction) => {
   return book
     .save()
     .then((result) => {
+      next();
       return res.status(201).json({
         book: result
       });

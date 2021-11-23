@@ -1,10 +1,11 @@
 import * as express from 'express';
-import * as Controller from '../controllers/bookController';
+import {getAllBooks,createBook} from '../controllers/bookController';
+import { saveAudit } from '../audit_logs/controller';
 
 const router=express.Router();
 
-router.get('/getBooks/', Controller.getAllBooks)
-router.post('/createBook/', Controller.createBook);
+router.get('/getBooks/', getAllBooks)
+router.post('/createBook/', createBook, saveAudit);
 
 
-export = router;
+export default router;
