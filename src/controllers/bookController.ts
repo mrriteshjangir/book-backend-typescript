@@ -3,18 +3,17 @@ import * as mongoose from 'mongoose';
 import Book from '../models/bookModel';
 import { airbrake } from "../AirNote";
 
-const getAllBooks = (req: Request, res: Response, next: NextFunction) => {
+import { saveAudit } from "../audit_logs/controller";
+
+import { IRequest } from "../customeInterface";
+
+const getAllBooks = (req: IRequest | Request, res: Response, next: NextFunction) => {
   try {
     Book.find()
       .then((results: any) => {
-        return res.status(200).json(
-          {
-            books: results,
-            count: results.length
-          }
-        )
-      });
-    } catch (err) {
+        res.status(200).json({ books: results, count: results.length });
+      })
+  } catch (err) {
     airbrake.notify({
       error: err,
       context: { component: 'bootstrap' },
@@ -23,13 +22,12 @@ const getAllBooks = (req: Request, res: Response, next: NextFunction) => {
       session: { session1: 'value' },
     });
   }
-
 };
 
-const createBook = (req: Request, res: Response, next: NextFunction) => {
+const createBook = async (req: IRequest | Request, res: Response, next: NextFunction) => {
 
   let { title, author, price, details } = req.body;
-
+  
   const book = new Book({
     _id: new mongoose.Types.ObjectId(),
     title,
@@ -41,10 +39,11 @@ const createBook = (req: Request, res: Response, next: NextFunction) => {
   return book
     .save()
     .then((result) => {
-      next();
-      return res.status(201).json({
-        book: result
-      });
+      res.status(200).json({ book: result });
+
+      (req as IRequest).description= title + ' added';
+
+      saveAudit(req as IRequest, res, next);
     })
     .catch((err) => {
       airbrake.notify({
@@ -56,5 +55,8 @@ const createBook = (req: Request, res: Response, next: NextFunction) => {
       });
     });
 };
+
+
+
 
 export { getAllBooks, createBook };

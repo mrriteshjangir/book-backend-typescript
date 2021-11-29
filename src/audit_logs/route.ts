@@ -1,5 +1,5 @@
 import * as express from 'express';
-import {saveAudit,getAudit} from './controller';
+import { getAudit } from './controller';
 
 const router=express.Router();
 

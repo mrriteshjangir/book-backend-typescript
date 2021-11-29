@@ -1,54 +1,43 @@
 import { NextFunction, Request, Response } from "express";
-
-import * as mongoose from 'mongoose';
 import Audit from './model'
 
-import { airbrake } from "../AirNote";
+import { IRequest } from "../customeInterface";
 
-export const saveAudit = async (req: Request, res: Response, next: NextFunction) => {
+export const addAsyncLog = (auditObj: any) => {
+  const new_audit = new Audit(auditObj);
+  new_audit.save((err: any) => {
+    if (err) { console.log("Error while adding new audit log :", err); }
+  });
+}
 
-    let { title , author } = req.body;
+export const saveAudit = async (req: IRequest | Request, res: Response, next: NextFunction,  model?: any) => {
+  try {
+    const auditObj: any = {};
 
-    let description = title +' added by '+author;
+    auditObj.request_type = req.method;
+    auditObj.request_route = req.path;
+    auditObj.response_status_code = res.statusCode;
+    auditObj.ips = req.ip;
+    auditObj.description = (req as IRequest).description;
 
-    const audit_log = new Audit({
-        description, 
-    });
+    if (model) {
+      auditObj.mutated_document_id = model._id;
+      auditObj.mutated_document_collection = model.collection.collectionName;
+    }
 
-    return audit_log
-        .save()
-        .then((result) => {
-            res.status(201).json({
-                audit_log: result
-            });
-        })
-        .catch((err) => {
-            airbrake.notify({
-                error: err,
-                context: { component: 'bootstrap' },
-            });
-        });
+    addAsyncLog(auditObj);
+
+  } catch (error) {
+    console.log("Error while addit audit log :", error);
+    next();
+  }
 };
 
 export const getAudit = (req: Request, res: Response, next: NextFunction) => {
-    try {
-      Audit.find()
-        .then((results: any) => {
-          return res.status(200).json(
-            {
-              Logs: results,
-              count: results.length
-            }
-          )
-        });
-      } catch (err) {
-      airbrake.notify({
-        error: err,
-        context: { component: 'bootstrap' },
-        environment: { env1: 'value' },
-        params: { param1: 'value' },
-        session: { session1: 'value' },
+  try {
+    Audit.find()
+      .then((results: any) => {
+        return res.status(200).json({ Logs: results, count: results.length });
       });
-    }
-  
-  };
+  } catch (err) { console.log(err); }
+};
